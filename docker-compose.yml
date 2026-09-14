@@ -1,0 +1,93 @@
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:z
+    ports:
+      - "5432:5432"
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+    ports:
+      - "5672:5672"   # AMQP
+      - "15672:15672" # painel de administracao (http://localhost:15672)
+
+  # Duas instancias da mesma API, para o Nginx balancear carga entre elas.
+  api1:
+    build:
+      context: ./api
+      network: host
+    environment:
+      INSTANCE_ID: api1
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      PGHOST: postgres
+      RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672
+      JWT_SECRET: ${JWT_SECRET}
+      VAULT_ENC_KEY: ${VAULT_ENC_KEY}
+    depends_on:
+      - postgres
+      - rabbitmq
+
+  api2:
+    build:
+      context: ./api
+      network: host
+    environment:
+      INSTANCE_ID: api2
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      PGHOST: postgres
+      RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672
+      JWT_SECRET: ${JWT_SECRET}
+      VAULT_ENC_KEY: ${VAULT_ENC_KEY}
+    depends_on:
+      - postgres
+      - rabbitmq
+
+  worker-notifications:
+    build:
+      context: ./worker-notifications
+      network: host
+    environment:
+      RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672
+    depends_on:
+      - rabbitmq
+
+  worker-audit:
+    build:
+      context: ./worker-audit
+      network: host
+    environment:
+      RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      PGHOST: postgres
+    depends_on:
+      - postgres
+      - rabbitmq
+
+  gateway:
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      - api1
+      - api2
+
+volumes:
+  postgres_data:

@@ -1,0 +1,13 @@
+{
+  "name": "worker-audit",
+  "version": "1.0.0",
+  "description": "Consumidor da fila audit-log - grava trilha de auditoria no Postgres",
+  "main": "src/consumer.js",
+  "scripts": {
+    "start": "node src/consumer.js"
+  },
+  "dependencies": {
+    "amqplib": "^0.10.4",
+    "pg": "^8.12.0"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "worker-notifications",
+  "version": "1.0.0",
+  "description": "Consumidor da fila notifications - envia e-mail quando uma senha e cadastrada",
+  "main": "src/consumer.js",
+  "scripts": {
+    "start": "node src/consumer.js"
+  },
+  "dependencies": {
+    "amqplib": "^0.10.4",
+    "nodemailer": "^6.9.14"
+  }
+}

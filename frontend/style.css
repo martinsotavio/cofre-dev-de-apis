@@ -1,0 +1,112 @@
+/* Estilo minimo, so para o trabalho ficar apresentavel - sem framework de CSS. */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 16px;
+    background: #f4f4f4;
+    color: #222;
+}
+
+header {
+    margin-bottom: 24px;
+}
+
+.instancia {
+    font-size: 12px;
+    color: #777;
+}
+
+.oculto {
+    display: none;
+}
+
+form {
+    background: #fff;
+    padding: 16px;
+    border-radius: 6px;
+    margin-bottom: 24px;
+}
+
+label {
+    display: block;
+    margin-bottom: 12px;
+    font-size: 14px;
+}
+
+input {
+    width: 100%;
+    padding: 8px;
+    margin-top: 4px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+button {
+    background: #2b6cb0;
+    color: #fff;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #234e8a;
+}
+
+.link {
+    background: none;
+    color: #2b6cb0;
+    text-decoration: underline;
+    padding: 0;
+    margin-top: 12px;
+}
+
+.erro {
+    color: #c0392b;
+    font-size: 14px;
+}
+
+.topo-vault {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+ul#listaItens {
+    list-style: none;
+    padding: 0;
+}
+
+ul#listaItens li {
+    background: #fff;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+}
+
+ul#listaItens li .acoes {
+    margin-top: 8px;
+}
+
+ul#listaItens li .acoes button {
+    font-size: 12px;
+    padding: 6px 10px;
+    margin-right: 6px;
+}
+
+.senha-revelada {
+    font-family: monospace;
+    background: #eef;
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-top: 6px;
+}

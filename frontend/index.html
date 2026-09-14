@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Cofre de Senhas</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Cofre de Senhas</h1>
+        <p id="instanciaInfo" class="instancia"></p>
+    </header>
+
+    <!-- Tela de login / cadastro, mostrada quando nao ha token salvo -->
+    <section id="telaAuth">
+        <form id="formAuth">
+            <h2 id="tituloAuth">Entrar</h2>
+            <label>
+                Email
+                <input type="email" id="authEmail" required>
+            </label>
+            <label>
+                Senha
+                <input type="password" id="authSenha" required minlength="6">
+            </label>
+            <button type="submit">Entrar</button>
+            <p class="erro" id="authErro"></p>
+            <button type="button" id="alternarAuth" class="link">Ainda nao tenho conta - cadastrar</button>
+        </form>
+    </section>
+
+    <!-- Tela principal do cofre, mostrada apos o login -->
+    <section id="telaVault" class="oculto">
+        <div class="topo-vault">
+            <span id="usuarioLogado"></span>
+            <button id="botaoSair">Sair</button>
+        </div>
+
+        <form id="formNovoItem">
+            <h2>Nova credencial</h2>
+            <label>
+                Serviço
+                <input type="text" id="novoServico" placeholder="Ex: Netflix" required>
+            </label>
+            <label>
+                Usuário/login
+                <input type="text" id="novoUsuario" required>
+            </label>
+            <label>
+                Senha
+                <input type="text" id="novaSenha" required>
+            </label>
+            <label>
+                URL (opcional)
+                <input type="text" id="novaUrl">
+            </label>
+            <button type="submit">Salvar no cofre</button>
+        </form>
+
+        <h2>Minhas credenciais</h2>
+        <ul id="listaItens"></ul>
+    </section>
+
+    <script src="app.js"></script>
+</body>
+</html>
