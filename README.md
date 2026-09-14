@@ -51,8 +51,10 @@ RabbitMQ ficarem prontos antes de iniciar.
 1. Abra **http://localhost:8080**, cadastre um usuário e faça login.
 2. Cadastre uma credencial (serviço, usuário, senha). Isso deve:
    - Aparecer na lista imediatamente (via `GET /vault-items`);
-   - Disparar um e-mail de notificação — veja o link de preview do Ethereal
-     nos logs do worker: `docker compose logs -f worker-notifications`;
+   - Disparar um e-mail de notificação: se `SMTP_HOST`/`SMTP_USER`/`SMTP_PASS`
+     estiverem configurados no `.env`, o e-mail chega de verdade na caixa de
+     entrada; caso contrário, o worker usa o Ethereal (e-mail de teste) e
+     mostra um link de preview nos logs: `docker compose logs -f worker-notifications`;
    - Gravar um evento de auditoria — confira com:
      ```
      docker compose exec postgres psql -U vaultuser -d vaultdb -c "SELECT * FROM audit_log ORDER BY id DESC LIMIT 5;"

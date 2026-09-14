@@ -9,14 +9,18 @@ perguntas técnicas sobre as decisões tomadas.
 - [ ] `docker compose down -v` seguido de `docker compose up --build -d` pelo
       menos uma vez antes da apresentação, para garantir que sobe do zero.
 - [ ] Confirmar que `.env` existe (copiado de `.env.example`, com
-      `JWT_SECRET`/`VAULT_ENC_KEY` gerados).
+      `JWT_SECRET`/`VAULT_ENC_KEY` gerados) e que `SMTP_HOST`, `SMTP_USER` e
+      `SMTP_PASS` estão preenchidos com a senha de app do Gmail (não a senha
+      normal da conta) — é isso que faz o e-mail cair na caixa real.
 - [ ] Ter à mão duas abas do navegador: uma em `http://localhost:8080`
       (aplicação) e outra em `http://localhost:15672` (painel do RabbitMQ,
       login com o usuário/senha do `.env`).
-- [ ] Ter um terminal à mão para `docker compose logs -f worker-notifications`
-      (mostrar o link de preview do e-mail).
-- [ ] Testar internet na sala — o worker de notificações depende do Ethereal
-      (serviço externo de e-mail de teste).
+- [ ] Ter o Gmail aberto num celular ou outra aba, pronto para mostrar o
+      e-mail chegando ao vivo.
+- [ ] **Testar internet na sala antes de começar** — com SMTP real, a
+      notificação por e-mail passa a depender de internet + do Gmail aceitar
+      o envio na hora. Se a rede da sala for instável, ver o plano B no final
+      deste documento (voltar para o Ethereal).
 
 ## Roteiro (ordem sugerida)
 
@@ -49,9 +53,11 @@ perguntas técnicas sobre as decisões tomadas.
    - Criar uma nova credencial na interface.
    - Mostrar no painel do RabbitMQ (`localhost:15672` → Queues) as duas
      filas `notifications` e `audit-log` recebendo e processando mensagens.
-   - Mostrar no terminal (`docker compose logs worker-notifications`) o link
-     de preview do e-mail gerado pelo Ethereal e abrir esse link, mostrando
-     o e-mail "recebido".
+   - Mostrar o e-mail chegando de verdade na caixa de entrada (Gmail) —
+     configuramos SMTP real, então não é mais um link de preview, é o e-mail
+     mesmo. Se quiser reforçar tecnicamente, pode mostrar antes o log
+     (`docker compose logs worker-notifications`) com a linha
+     "usando SMTP real (smtp.gmail.com)".
    - Consultar a tabela de auditoria:
      ```
      docker compose exec postgres psql -U vaultuser -d vaultdb -c "SELECT * FROM audit_log ORDER BY id DESC LIMIT 5;"
@@ -89,10 +95,12 @@ Os dados têm relacionamento claro (usuário → itens do cofre → auditoria) e
 se beneficiam de chaves estrangeiras e integridade referencial.
 
 **O e-mail é real?**
-Não — usamos o Ethereal, serviço de teste do próprio Nodemailer, que simula
-o envio e devolve um link de preview. Evita expor credenciais de e-mail
-reais ou mandar mensagem para caixas de verdade, mas o fluxo de SMTP é
-genuíno.
+Sim — o worker está configurado com SMTP real do Gmail (via senha de app,
+não a senha da conta) e o e-mail chega de verdade na caixa de entrada. O
+código também suporta um modo de teste com o Ethereal (serviço de teste do
+próprio Nodemailer, que simula o envio sem entregar de verdade) — é o que
+usamos por padrão quando não há SMTP configurado, útil para não depender de
+credenciais reais em outros ambientes.
 
 ## Se algo der errado ao vivo
 
@@ -100,10 +108,20 @@ genuíno.
   ver o erro. Erros mais prováveis: porta ocupada (`8080`, `5432`, `5672`,
   `15672`) por outro processo — parar o processo ou trocar a porta no
   `docker-compose.yml`.
-- **E-mail não chega / sem internet**: pular essa parte da demo e mostrar
-  direto a fila `notifications` recebendo e consumindo a mensagem no painel
-  do RabbitMQ — a mensageria em si já está provada, o e-mail é só a "ponta"
-  visual.
+- **E-mail real não chega / sem internet / Gmail bloqueou o envio**: dá para
+  voltar ao Ethereal em segundos, sem mudar código — só esvaziar as
+  variáveis SMTP e reiniciar o worker:
+  ```
+  # no .env, apague os valores de SMTP_HOST, SMTP_USER e SMTP_PASS
+  # (ou comente as linhas), depois:
+  docker compose up -d --build worker-notifications
+  docker compose logs -f worker-notifications
+  ```
+  Vai aparecer "caixa de teste Ethereal criada" e um link de preview a cada
+  e-mail — mensageria continua provada, só muda a "ponta" visual. Ou, se
+  preferir nem tentar consertar ao vivo, pule direto para mostrar a fila
+  `notifications` recebendo e consumindo a mensagem no painel do RabbitMQ —
+  isso já prova a mensageria funcionando, com ou sem e-mail.
 - **Rate limit atrapalhando a própria demo**: se testar login errado demais
   vezes antes da apresentação, espere ~1 minuto para a janela resetar, ou
   reinicie o gateway (`docker compose restart gateway`) para zerar o estado.

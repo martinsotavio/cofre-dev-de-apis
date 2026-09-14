@@ -1,10 +1,12 @@
 // Consumidor da fila "notifications".
 // Para cada senha cadastrada no cofre, envia um e-mail avisando o dono.
 //
-// Para a demonstracao usamos o Ethereal (https://ethereal.email), um servico
-// de teste do proprio Nodemailer: ele cria uma caixa de entrada falsa na hora
-// e devolve um link de preview para cada e-mail "enviado". Isso evita usar
-// credenciais de e-mail reais ou mandar mensagem para caixas de verdade.
+// Por padrao usamos o Ethereal (https://ethereal.email), um servico de teste
+// do proprio Nodemailer: ele cria uma caixa de entrada falsa na hora e devolve
+// um link de preview para cada e-mail "enviado" - nao entrega em caixas reais,
+// o que e' o comportamento certo para a apresentacao (nao depende de SMTP real
+// nem manda mensagem de verdade). Se as variaveis SMTP_HOST/SMTP_USER/SMTP_PASS
+// estiverem definidas, usa esse SMTP real no lugar do Ethereal.
 
 const amqp = require('amqplib');
 const nodemailer = require('nodemailer');
@@ -29,6 +31,16 @@ async function conectarRabbitMQ(maxTentativas = 15, intervaloMs = 2000) {
 }
 
 async function criarTransportadorEmail() {
+    if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+        console.log(`worker-notifications: usando SMTP real (${process.env.SMTP_HOST}).`);
+        return nodemailer.createTransport({
+            host: process.env.SMTP_HOST,
+            port: Number(process.env.SMTP_PORT || 587),
+            secure: process.env.SMTP_SECURE === 'true',
+            auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+        });
+    }
+
     const contaTeste = await nodemailer.createTestAccount();
     console.log('worker-notifications: caixa de teste Ethereal criada.');
     console.log(`  usuario: ${contaTeste.user}`);
@@ -52,7 +64,13 @@ async function processarMensagem(transportador, mensagem) {
     });
 
     console.log(`worker-notifications: e-mail enviado para ${userEmail} sobre "${serviceTitle}".`);
-    console.log(`  preview: ${nodemailer.getTestMessageUrl(info)}`);
+
+    // getTestMessageUrl so retorna algo quando o transportador e' o Ethereal;
+    // com SMTP real (Gmail etc) ele retorna false, entao so logamos se existir.
+    const previewUrl = nodemailer.getTestMessageUrl(info);
+    if (previewUrl) {
+        console.log(`  preview: ${previewUrl}`);
+    }
 }
 
 async function iniciar() {

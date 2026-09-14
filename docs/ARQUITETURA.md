@@ -43,6 +43,21 @@ disponível, o stack Grafana + Loki + Promtail tem mais peças móveis e mais
 risco de falhar durante a apresentação ao vivo, sem agregar tanto à
 demonstração quanto as outras duas opções.
 
+## E-mail: SMTP real ou Ethereal
+
+O `worker-notifications` suporta dois modos, escolhidos automaticamente pela
+presença das variáveis `SMTP_HOST`/`SMTP_USER`/`SMTP_PASS` no `.env`:
+
+- **SMTP real** (ex: Gmail com senha de app): o e-mail chega de verdade na
+  caixa de entrada do usuário. É o modo usado na apresentação.
+- **Ethereal** (padrão quando as variáveis SMTP não estão definidas): serviço
+  de teste do próprio Nodemailer, que simula o envio e devolve um link de
+  preview, sem entregar em caixa real. Útil para rodar o projeto sem
+  depender de credenciais de e-mail de alguém.
+
+Em ambos os casos o fluxo de mensageria é o mesmo (a fila `notifications` é
+publicada e consumida da mesma forma) — só muda o transporte SMTP final.
+
 ## Segurança das senhas no cofre
 
 - A senha mestra do usuário (login) é armazenada com hash `bcrypt`, nunca em
