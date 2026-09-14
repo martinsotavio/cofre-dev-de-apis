@@ -79,6 +79,13 @@ se o envio de e-mail falhar ou demorar, isso não pode atrasar ou quebrar a
 gravação da auditoria (e vice-versa). Cada fila também pode escalar e ser
 monitorada de forma independente.
 
+**O rate limit é por IP — e se o ataque vier de vários IPs?**
+Sim, o limite é por IP (`$binary_remote_addr` no Nginx), então cada IP tem
+sua própria cota — isso impede um atacante sozinho de tentar força bruta,
+mas não impede um ataque distribuído (vários IPs, poucas tentativas cada).
+Resolver isso exigiria outra camada (bloqueio de conta, CAPTCHA), fora do
+escopo deste trabalho.
+
 **Como a senha é protegida no banco?**
 A senha mestra do usuário (login) usa hash bcrypt. A senha de cada
 credencial do cofre é criptografada com AES-256-GCM antes de ser persistida;
