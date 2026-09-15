@@ -28,12 +28,23 @@ Preenche `JWT_SECRET` e `VAULT_ENC_KEY` no `.env` (gera cada um com
 docker compose up --build
 ```
 
-Aplicação em **http://localhost:8080**. Painel do RabbitMQ em
-**http://localhost:15672** (usuário/senha no `.env`).
-
 Requer Docker e Docker Compose v2. O comando acima sobe tudo — banco, filas,
 gateway e as duas instâncias da API esperam as dependências ficarem prontas
 antes de iniciar, sem nenhum passo manual extra.
+
+## Portas e variáveis de ambiente
+
+| Porta | Serviço |
+|---|---|
+| 8080 | Aplicação (frontend + API via gateway) |
+| 5432 | PostgreSQL |
+| 5672 | RabbitMQ (AMQP) |
+| 15672 | Painel do RabbitMQ (usuário/senha no `.env`) |
+
+Todas as variáveis usadas (`.env`) estão listadas e comentadas em
+[`.env.example`](.env.example) — `JWT_SECRET` e `VAULT_ENC_KEY` são
+obrigatórias; `SMTP_*` é opcional (sem elas, o e-mail de notificação usa o
+Ethereal em vez de SMTP real).
 
 ## Estrutura
 
